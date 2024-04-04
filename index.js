@@ -1,15 +1,26 @@
 const express = require('express');
 const path = require('node:path'); 
-// import socket_server from "server.js";
+
 const { createServer } = require("node:http");
+const { Server } = require("socket.io");
+const { Socket } = require('node:dgram');
 
 const app = express();
 const server = createServer(app);
+const port = 3000;
+const io = new Server(server);
 
 app.get("/", (req, res) => {
-    res.send("<h1>Hello world");
+    res.sendFile(path.join(__dirname,"index.html"));
 });
 
-server.listen(3000, () => {
-    console.log("server running at http://localhost:3000");
+server.listen(port, () => {
+    console.log(`server running at http://localhost:${port}`);
+});
+
+io.on('connection', (socket)=>{
+    console.log("Пользователь +");
+    socket.on('disconnect', () => {
+        console.log('Пользователь -');
+    });
 });
