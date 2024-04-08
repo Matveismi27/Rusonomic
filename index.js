@@ -1,9 +1,9 @@
 const express = require('express');
 const path = require('path'); 
 
-const { createServer } = require("node:http");
+const { createServer } = require("http");
 const { Server } = require("socket.io");
-const { Socket } = require('node:dgram');
+const { Socket } = require('dgram');
 
 const app = express();
 const server = createServer(app);
