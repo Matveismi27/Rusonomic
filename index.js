@@ -1,5 +1,5 @@
 const express = require('express');
-const path = require('node:path'); 
+const path = require('path'); 
 
 const { createServer } = require("node:http");
 const { Server } = require("socket.io");
