@@ -18,6 +18,7 @@ html,body{
 }
 #canvas{
     position: fixed;
+    width: 512px;
 }
 .info{
     width: 100%;
