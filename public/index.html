@@ -1,45 +1,215 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>Socket.IO chat</title>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Русономик</title>
     <link rel="stylesheet" href="style.css">
-  </head>
-  <body>
     <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <canvas id="canvas" height="600" width="600"></canvas>
+    <div class="high_menu market">
+        <div class="product">
+            <div class="name">Дерево</div>
+            <div class="cost">1 з.</div>
+            <div class="count">6 шт.</div>
+        </div>
+    </div>
+    <div class="bottom_panel" id="market_panel">
+        <div class="button back" onclick="back()">назад</div>
+    </div>
+    <div class="bottom_panel" id="earn_panel">
+        <div class="button back" onclick="back()">меню</div>
+        <div class="button" id="earn_wood">добыть дерево</div>
+        <div class="button" id="craft_statuet">создать статуэтку</div>
+        <div class="button" id="to_forest ц">Выйти в лес</div>
+    </div>
+    <div class="bottom_panel" id="upgrade_panel">
+        <div class="button back" onclick="back()">назад</div>
+        <div class="button" id="read_books">Читать книги</div>
+        <div class="button" id="find_master">Найти мастера</div>
+    </div>
+
+    <div class="bottom_panel" id="main_panel">
+        <div class="button" id="upgrade">Прокачка</div>
+        <div class="button" id="earn">Добыча ресурсов</div>
+        <div class="button" id="market">Рынок</div>
+    </div>
 
 
-    <ul id="messages"></ul>
-    <form id="form" action="">
-      <input id="name" autocomplete="off" />
-      <input id="input" autocomplete="off" />
-      <button>Send</button>
-    </form>
-    
-    <script>
+    <div class="right_menu">
+        <div class="town_info info">Статус города:</div>
+        <div class="player_info info">Статус игрока:</div>
+    </div>
+</body>
+
+<script>
     const socket = io();
-    const form = document.getElementById('form');
-    const input = document.getElementById('input');
-    const name = document.getElementById('name');
-    const messages = document.getElementById('messages');
+    socket.emit("get_data",(response)=>{
+        data = response.data;
+        display(data);
+    })
 
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      if (input.value) {
-        socket.emit('chat message', {
-          name:name.value,
-          text:input.value
-        });
-        input.value = '';
-      }
+    function back() {
+        document.querySelector(".right_menu").style.display = "block";
+        document.querySelector("#main_panel").style.display = "block";
+        document.querySelector("#market_panel").style.display = "none";
+        document.querySelector("#upgrade_panel").style.display = "none";
+        document.querySelector("#earn_panel").style.display = "none";   
+        document.querySelector(".market").style.display = "none";
+    }
+    document.querySelector("#market").addEventListener('click', (e) => {
+        //Открыть интерфейс рынка
+        document.querySelector("#earn_panel").style.display = "none";
+        document.querySelector("#main_panel").style.display = "none";
+        document.querySelector("#market_panel").style.display = "block";
+        document.querySelector(".market").style.display = "grid";
+        document.querySelector("#upgrade_panel").style.display = "none";
+        document.querySelector(".right_menu").style.display = "none";
+    });
+    document.querySelector("#upgrade").addEventListener('click', (e) => {
+        //Открыть интерфейс рынка
+        document.querySelector("#earn_panel").style.display = "none";
+        document.querySelector("#main_panel").style.display = "none";
+        document.querySelector("#market_panel").style.display = "none";
+        document.querySelector("#upgrade_panel").style.display = "block";
+    });
+    document.querySelector("#earn").addEventListener('click', (e) => {
+        //Открыть интерфейс рынка
+        document.querySelector("#earn_panel").style.display = "block";
+        document.querySelector("#main_panel").style.display = "none";
+        document.querySelector("#upgrade_panel").style.display = "none";
+        document.querySelector("#market_panel").style.display = "none";
     });
 
-    socket.on('chat message', (msg) => {
-      const item = document.createElement('li');
-      item.textContent = msg.name+":"+msg.text;
-      messages.appendChild(item);
-      window.scrollTo(0, document.body.scrollHeight);
+    async function display(data){
+        data.town.text = `
+        <span>Имя города:</span> ${data.town.name} <br>
+        <span>Казна города:</span> ${data.town.money}₽<br>
+        <span>Население:</span> ${data.town.population}<br>
+        `;
+        player = data.players[socket.id];
+        data.players[socket.id].text = `
+        <span>id:</span> ${socket.id}<br>
+        <span>Имя:</span> ${player.name}<br>
+        <span>Капитал:</span> ${player.money}₽<br>
+        <span>уровень:</span> ${player.level}<br>
+        <span>класс:</span> ${player.class}<br>
+        `;
+        document.querySelector(".town_info").innerHTML = data.town.text
+        document.querySelector(".player_info").innerHTML = data.players[socket.id].text
+    }
+    socket.on('data', (new_data) => {
+        data = new_data;
+        display(data);
     });
-    </script>
-  </body>
+
+    document.querySelector("#earn_wood").addEventListener('click', (e) => {
+        e.preventDefault();
+        socket.emit('earn_wood',socket.id)
+    });
+    document.querySelector("#craft_statuet").addEventListener('click', (e) => {
+        e.preventDefault();
+        //Базовая проверка на наличие ресурсов, остальное сделает сервер
+        socket.emit('craft_statuet',socket.id);
+    });
+
+
+const canvas = document.getElementById("canvas")
+const ctx = canvas.getContext("2d")
+//нарисуем сетку
+let width = canvas.width
+let height = canvas.height
+// alert(width+" : "+height)
+let grid_rows = 7
+let grid_columns = 7
+let pole = [[]]
+let row = [[]]
+let bold = 2
+tictac = "x"
+function FirstDrawGrid(){
+    for (i=0;i<=grid_columns;i+=1){
+        ctx.fillRect(width/grid_columns*i,0              ,bold,height)
+        row[i]=0
+    }
+    for (i=0;i<=grid_rows;i+=1){
+        ctx.fillRect(0                   ,height/grid_rows*i,width+bold,bold)
+        pole[i]=[]
+        for (j in row){
+            pole[i][j]=row[j]
+        }
+    }
+}
+
+function drawGrid(){
+    for (i=0;i<=grid_columns;i+=1){
+        ctx.fillRect(width/grid_columns*i,0              ,bold,height)
+    }
+    for (i=0;i<=grid_rows;i+=1){
+        ctx.fillRect(0                   ,height/grid_rows*i,width+bold,bold)
+    }
+}
+
+function drawGridRect(x1,y1,x2,y2,text){
+    for (i=x1;i<x2;i++){
+        for(j=y1;j<y2;j++){
+            pole[i][j]=text
+        }
+    }
+}
+
+FirstDrawGrid()
+drawGridRect(0,0,6,7,1)
+pole[1][1]=2
+function click(x,y){// функция производит необходимые действие при клике(касанию)
+    console.log(pole)
+    if (y>grid_rows||x>grid_columns||pole[y][x]==0){
+        return
+    }
+    console.log("клик на "+x+":"+y)
+    player=find(2)
+    pole[player.row][player.col]=1
+    pole[y][x]=2
+    draw()
+    drawGrid()
+}
+canvas.onclick = function(e) { // обрабатываем клики мышью
+    var x = (e.pageX - canvas.offsetLeft) / (width/grid_columns) | 0;//находит КЛЕТКУ!
+    var y = (e.pageY - canvas.offsetTop)  / (height/grid_rows) | 0;
+    click(x, y); // выхов функции действия
+};
+
+function find(text){
+    for (i in pole){
+        for (j in pole[i]){
+            if (pole[i][j] == text){
+                return {row:i,col:j}
+            }
+        }
+    }
+}
+
+function draw(){
+    i=0
+    j=0
+    while (j<grid_rows){
+        while (i<grid_columns){
+            if (pole[j][i]==0){
+                ctx.fillStyle = "#000"
+            }else if (pole[j][i]==1){
+                ctx.fillStyle = "#fff"
+            }else if (pole[j][i]==2){
+                ctx.fillStyle = "#999"
+            }
+            ctx.fillRect(i*(width/grid_columns)+bold,j*(height/grid_rows)+bold,width/grid_columns,height/grid_rows)
+            i+=1
+        }
+        i=0
+        j+=1
+    }
+}
+draw()
+drawGrid()
+</script>
 </html>

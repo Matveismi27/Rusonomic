@@ -10,3 +10,158 @@ body { margin: 0; padding-bottom: 3rem; font-family: -apple-system, BlinkMacSyst
 #messages { list-style-type: none; margin: 0; padding: 0; }
 #messages > li { padding: 0.5rem 1rem; }
 #messages > li:nth-child(odd) { background: #efefef; }
+html,body{
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    background-image: url('rus.jpg');
+}
+#canvas{
+    position: fixed;
+}
+.info{
+    width: 100%;
+    max-height: fit-content;
+    padding: 0.5vw;
+    margin: 0.1vw;
+    border: none;
+    border-radius: 3px;
+    background-color: #333;
+    color: #ffffff;
+}
+.player_info span{
+    background-color: #b73030;
+    border: none;
+    padding: 0.2vw;
+    border-radius: 3px;
+    color: #ffffff;
+}
+.town_info span{
+    background-color: #4630b7;
+    border: none;
+    padding: 0.2vw;
+    border-radius: 3px; 
+    color: #ffffff;
+}
+.high_menu{
+    background-color: rgba(51, 51, 51, 0.952);
+    color: white;
+    position: fixed;
+    left: 1px;
+    top: 1px;
+    bottom: auto;
+    right: 1px;
+}
+.market{
+    display: none;
+    background-color: #3339;
+    border: none;
+    padding: 2px;
+    border-radius: 10px; 
+    flex-direction: row;
+    box-sizing: border-box;
+    font-size: clamp(10px,1.8vh,20px);
+    position: fixed;
+    right: 2vw;
+    left: 2vw;
+    bottom: 12vh;
+    top: 2vw;
+    grid-template-columns: 1em,1em;
+    grid-template-rows: 1em,1em;
+    width: auto;
+    backdrop-filter: blur(8px);
+}
+.right_menu{
+    flex-direction: column;
+    box-sizing: border-box;
+    font-size: clamp(17px,1.8vw,20px);
+    line-height:clamp(25px,3.5vw,40px);
+    position: fixed;
+    right: 2vw;
+    display: flex;
+    height: fit-content;
+    width: clamp(auto,30vw,300px);
+    backdrop-filter: blur(10px);
+}
+.bottom_panel{
+    background-color: #333;
+    border: none;
+    padding: 2px;
+    border-radius: 10px; 
+    flex-direction: row;
+    box-sizing: border-box;
+    font-size: clamp(10px,1.8vh,20px);
+    position: fixed;
+    right: 2vw;
+    left: 2vw;
+    bottom: 2vh;
+    display: grid;
+    grid-template-columns: 1em,1em;
+    grid-template-rows: 1em,1em;
+    width: auto;
+    backdrop-filter: blur(10px);
+}
+.product{
+    display: grid;
+    grid-template-columns: 3fr 1fr 1fr;
+    grid-gap: 0.4%;
+    text-align: center;
+    margin: 5px;
+    height: clamp(35px,3vh,55px);
+    font-size: clamp(22px,2vh,40px);
+    background-color: #001c37;
+    color: #fff;
+    border: none;
+    padding: 0.3vh;
+    user-select: none;
+    border-radius: 10px; 
+    transition: 50ms;
+}
+.product div{
+    border: none;
+    padding: 0.2vh;
+    border-radius: 6px; 
+}
+.product .name{
+    width: 4fr;
+    background-color: #003464;
+}
+.product .count{
+    width: 2fr;
+    background-color: #003f79;
+}
+.product .cost{
+    width: 1fr;
+    background-color: #ebb800;
+    color: black;
+}
+.button{
+    margin: 5px;
+    height: clamp(25px,3vh,35px);
+    font-size: clamp(20px,2vh,30px);
+    background-color: #4630b7;
+    color: #fff;
+    border: none;
+    padding: 1vh;
+    user-select: none;
+    border-radius: 10px; 
+    transition: 50ms;
+}
+.button:hover{
+    background-color: #3f2ca1;
+    transition: 50ms;
+}
+.button:active {
+    background-color: #8d83c1;
+    transition: 50ms;
+}
+
+.button.back{
+    background-color: #b73030;
+}
+.button.back:hover{
+    background-color: #c33f3f;
+}
+.button.back:active{
+    background-color: #dd7171;
+}
