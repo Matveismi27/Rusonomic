@@ -52,6 +52,19 @@ io.on('connection', (socket)=>{
         console.log("change_data...");
         io.emit('data', server_data);
     });
+    socket.on('earn_wood', (id) => {
+        
+        console.log(id+" earning wood");
+        if (server_data.players[id].inventory["wood"]){
+            server_data.players[id].inventory["wood"].count+=1;
+        }else{
+            server_data.players[id].inventory["wood"] = {
+                name:"wood",
+                count:1
+            }
+        }
+        io.emit('data', server_data);
+    });
     socket.on('disconnect', (user) => {
         delete server_data.players[socket.id]
         update_server_data(server_data)
