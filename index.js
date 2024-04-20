@@ -4,7 +4,7 @@ const server = require("./routes");
 const { Server } = require("socket.io");
 
 const io = new Server(server);
-const server_data={ //Значение по умолчанию
+let server_data={ //Значение по умолчанию
     players : {},
     town : {
         population:0,

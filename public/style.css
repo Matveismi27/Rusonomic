@@ -16,10 +16,6 @@ html,body{
     height: 100%;
     background-image: url('rus.jpg');
 }
-#canvas{
-    position: fixed;
-    width: 512px;
-}
 .info{
     width: 100%;
     max-height: fit-content;
@@ -84,6 +80,11 @@ html,body{
     width: clamp(auto,30vw,300px);
     backdrop-filter: blur(10px);
 }
+.canvas{
+    display: none;
+    position: fixed;
+    width: 512px;
+}
 .bottom_panel{
     background-color: #333;
     border: none;
@@ -97,6 +98,7 @@ html,body{
     left: 2vw;
     bottom: 2vh;
     display: grid;
+    display: none;
     grid-template-columns: 1em,1em;
     grid-template-rows: 1em,1em;
     width: auto;
