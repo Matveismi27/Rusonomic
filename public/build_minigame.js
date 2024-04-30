@@ -41,14 +41,12 @@ function BuildTown(canvas){
     }
     
     FirstDrawGrid()
-    drawGridRect(1,1,6,6,1)
+    drawGridRect(1,1,5,5,1)
     pole[1][1]=2
     function click(x,y){// функция производит необходимые действие при клике(касанию)
-        console.log(pole)
         if (y>grid_rows||x>grid_columns||pole[y][x]==0){
             return
         }
-        console.log("клик на "+x+":"+y)
         player=find(2)
         pole[player.row][player.col]=1
         pole[y][x]=2
@@ -56,8 +54,9 @@ function BuildTown(canvas){
         drawGrid()
     }
     canvas.onclick = function(e) { // обрабатываем клики мышью
-        var x = (e.pageX - canvas.offsetLeft) / (width/grid_columns) | 0;//находит КЛЕТКУ!
-        var y = (e.pageY - canvas.offsetTop)  / (height/grid_rows) | 0;
+        //Узнаем координаты
+        var x = (e.pageX - canvas.offsetLeft) / (canvas.offsetWidth/grid_columns) | 0;//находит КЛЕТКУ!
+        var y = (e.pageY - canvas.offsetTop)  / (canvas.offsetWidth/grid_rows) | 0;
         click(x, y); // выхов функции действия
     };
     
@@ -71,15 +70,20 @@ function BuildTown(canvas){
         }
     }
     //Подгружаем картинки перед игрой
-    let dirtImg = new Image();
+    let treeImg = new Image();
     let field1Img = new Image();
-    let field2Img = new Image();
-    dirtImg.src = 'files/images/tree_min.png';
-    ctx.drawImage(dirtImg,height-5,width-3)
+    let house1Img = new Image();
+    treeImg.src = 'files/images/tree_min.png';
+    ctx.drawImage(treeImg,height-5,width-3)
     field1Img.src = 'files/images/empty.png';
     ctx.drawImage(field1Img,height-5,width-2)
-    field2Img.src = 'files/images/house.png';
-    ctx.drawImage(field2Img,height-5,width-1)
+    house1Img.src = 'files/images/house.png';
+    house1Img.onload =()=>{
+
+        draw();
+        drawGrid();
+    }
+    ctx.drawImage(house1Img,height-5,width-1)
     function draw(){
         i=0
         j=0
@@ -94,11 +98,11 @@ function BuildTown(canvas){
                 // }
                 let img = new Image();
                 if (pole[j][i]==0){
-                    ctx.drawImage(dirtImg,i*(width/grid_columns),j*(height/grid_rows))
+                    ctx.drawImage(treeImg,i*(width/grid_columns),j*(height/grid_rows))
                 }else if (pole[j][i]==1){
                     ctx.drawImage(field1Img,i*(width/grid_columns),j*(height/grid_rows))
                 }else if (pole[j][i]==2){
-                    ctx.drawImage(field2Img,i*(width/grid_columns),j*(height/grid_rows))
+                    ctx.drawImage(house1Img,i*(width/grid_columns),j*(height/grid_rows))
                 }
                 // ctx.fillRect(i*(width/grid_columns)+bold,j*(height/grid_rows)+bold,width/grid_columns,height/grid_rows)
                 i+=1
@@ -107,7 +111,5 @@ function BuildTown(canvas){
             j+=1
         }
     }
-    draw()
-    drawGrid()
+    
 }
-module.exports = BuildTown;

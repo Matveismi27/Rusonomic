@@ -11,10 +11,37 @@
     <canvas class="canvas" id="build_canvas" height="512" width="512"></canvas>
     <canvas class="canvas" id="fight_canvas" height="512" width="512"></canvas>
     <div class="high_menu market">
-        <div class="product">
-            <div class="name">Дерево</div>
-            <div class="cost">1 з.</div>
-            <div class="count">6 шт.</div>
+        <div class="market_top">
+            <div class="button" id="buy">
+                Купить
+            </div>
+            <div class="button" id="sell">
+                Продать
+            </div>
+        </div>
+        <div class="buy_products">
+            <div class="product">
+                <div class="name">Дерево</div>
+                <div class="cost">1 з.</div>
+                <div class="count">6 шт.</div>
+            </div>
+            <div class="product">
+                <div class="name">Дерево</div>
+                <div class="cost">1 з.</div>
+                <div class="count">4 шт.</div>
+            </div>
+            <div class="product">
+                <div class="name">Дерево</div>
+                <div class="cost">1 з.</div>
+                <div class="count">2 шт.</div>
+            </div>
+        </div>
+        <div class="sell_products">
+            <div class="product">
+                <div class="name">Дерево</div>
+                <div class="cost">1 з.</div>
+                <div class="count">6 шт.</div>
+            </div>
         </div>
     </div>
     <div class="bottom_panel" id="big_back">
@@ -54,7 +81,6 @@
         display(data);
     })
     document.querySelector("#main_panel").style.display = "block";
-
     function back() {
         document.querySelector(".right_menu").style.display = "block";
         document.querySelector("#main_panel").style.display = "block";
@@ -112,15 +138,31 @@
         display_build()
     });
     document.querySelector("#to_forest").addEventListener('click', (e) => {
-        display_fight()
-        let fight_canvas = document.querySelector("#fight_canvas");
-        fightGame(fight_canvas)
-        let fightGame_ = new FightGame(fight_canvas);
-        fightGame_.init();
-        fightGame_.enemy("ork", 1, 1);
+        //в лес за ресами
     });
-    
-
+    document.querySelector("#buy").addEventListener('click',(e)=>{
+        document.querySelector(".buy_products").style.display = "block";
+        document.querySelector(".sell_products").style.display = "none";
+    });
+    document.querySelector("#sell").addEventListener('click',(e)=>{
+        document.querySelector(".buy_products").style.display = "none";
+        document.querySelector(".sell_products").style.display = "block";
+        
+        document.querySelector(".sell_products").innerHTML = sell_inventory;
+    });
+    function sell(item_name){
+        cost = +prompt("введите желаемую стоимость продажи (0 для отмены)");
+        if (!cost){
+            return;
+        }
+        data = {
+            player_id: socket.id,
+            product_label: item_name,
+            product:item_name,
+            product_cost: cost,
+        }
+        socket.emit('place_product', data);
+    }
     async function display(data){
         data.town.text = `
         <span>Имя города:</span> ${data.town.name} <br>
@@ -128,15 +170,26 @@
         <span>Население:</span> ${data.town.population}<br>
         `;
         player = data.players[socket.id];
-        data.players[socket.id].text = `
+        var player_text = `
         <span>id:</span> ${socket.id}<br>
         <span>Имя:</span> ${player.name}<br>
         <span>Капитал:</span> ${player.money}₽<br>
         <span>уровень:</span> ${player.level}<br>
         <span>класс:</span> ${player.class}<br>
+        <span>инвентарь:</span> <br>
         `;
+        sell_inventory = "";
+        for (element in player.inventory){
+            object = player.inventory[element];
+            player_text += `${object.name}:${object.count}<br>`;
+            sell_inventory += `
+            <div onclick="sell('${element}')" class="tosell product">
+                <div class="name">${object.name}</div>
+                <div class="count">${object.count} шт.</div>
+            </div>`;
+        }
         document.querySelector(".town_info").innerHTML = data.town.text
-        document.querySelector(".player_info").innerHTML = data.players[socket.id].text
+        document.querySelector(".player_info").innerHTML = player_text;
     }
     socket.on('data', (new_data) => {
         data = new_data;
@@ -144,8 +197,15 @@
     });
 
     document.querySelector("#earn_wood").addEventListener('click', (e) => {
+        if (document.querySelector("#earn_wood").style.backgroundColor){
+            return;
+        }
         e.preventDefault();
-        socket.emit('earn_wood',socket.id)
+        socket.emit('earn_wood', socket.id);
+        document.querySelector("#earn_wood").style.backgroundColor = "#222020"
+        setTimeout(()=>{
+            document.querySelector("#earn_wood").style.backgroundColor = null;
+        },60000)
     });
     document.querySelector("#craft_statuet").addEventListener('click', (e) => {
         e.preventDefault();

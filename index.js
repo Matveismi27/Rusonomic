@@ -20,11 +20,14 @@ const server_market = {
 io.on('connection', (socket)=>{
     server_data.players[socket.id] = {
         name:"Имя",
-        text : "игрок 1",
+        text : "игрок",
         level : 0,
         class : "Ремесленник",
         money: 0,
-        inventory:{}
+        inventory:{},
+        timers:{
+            earn:0
+        }
     };
     console.log("+ Пользователь", server_data.players.length, server_data.players);
 
@@ -41,18 +44,22 @@ io.on('connection', (socket)=>{
     //     io.emit('data', server_data);
     // });
     socket.on('earn_wood', (id) => {
-        
-        console.log(id+" earning wood");
-        if (server_data.players[id].inventory["wood"]){
-            server_data.players[id].inventory["wood"].count+=1;
-        }else{
-            server_data.players[id].inventory["wood"] = {
-                name:"wood",
-                count:1
+        if (server_data.players[id].timers.earn<Date.now())
+        Promise.resolve().then(()=>{
+            console.log(id+" earning wood");
+            if (server_data.players[id].inventory["wood"]){
+                server_data.players[id].inventory["wood"].count+=1;
+            }else{
+                server_data.players[id].inventory["wood"] = {
+                    name:"wood",
+                    count:1
+                }
             }
-        }
-        server_data.players[id].timers.earn = Date.now()+60;
-        io.emit('data', server_data);
+            server_data.players[id].timers.earn = Date.now()+60000;
+        }).then(()=>{
+            console.log(server_data.players);
+            io.emit('data', server_data);
+        })
     });
     //Разместить товар на рынке
     socket.on('place_product', (ctx) => {
