@@ -79,7 +79,6 @@ function BuildTown(canvas){
     ctx.drawImage(field1Img,height-5,width-2)
     house1Img.src = 'files/images/house.png';
     house1Img.onload =()=>{
-
         draw();
         drawGrid();
     }
@@ -89,13 +88,6 @@ function BuildTown(canvas){
         j=0
         while (j<grid_rows){
             while (i<grid_columns){
-                // if (pole[j][i]==0){
-                //     ctx.fillStyle = "#000"
-                // }else if (pole[j][i]==1){
-                //     ctx.fillStyle = "#fff"
-                // }else if (pole[j][i]==2){
-                //     ctx.fillStyle = "#999"
-                // }
                 let img = new Image();
                 if (pole[j][i]==0){
                     ctx.drawImage(treeImg,i*(width/grid_columns),j*(height/grid_rows))
@@ -104,7 +96,6 @@ function BuildTown(canvas){
                 }else if (pole[j][i]==2){
                     ctx.drawImage(house1Img,i*(width/grid_columns),j*(height/grid_rows))
                 }
-                // ctx.fillRect(i*(width/grid_columns)+bold,j*(height/grid_rows)+bold,width/grid_columns,height/grid_rows)
                 i+=1
             }
             i=0

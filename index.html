@@ -8,6 +8,15 @@
     <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
+    <script>
+        const token = Storage.getItem("token");
+        if (token){
+            //Вы в аккаунте
+        }else{
+            
+        } 
+    </script>
+    <div id = "login"><a href="/login">Войдите в аккаунт</a> или <a href="/register">зарегистрируйтесь</a></div>
     <canvas class="canvas" id="build_canvas" height="512" width="512"></canvas>
     <canvas class="canvas" id="fight_canvas" height="512" width="512"></canvas>
     <div class="high_menu market">

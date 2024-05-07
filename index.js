@@ -1,48 +1,14 @@
-
-const pool = require("./db");
 const server = require("./routes");
 const { Server } = require("socket.io");
 
 const io = new Server(server);
-let server_data={ //Значение по умолчанию
-    players : {},
-    town : {
-        population:0,
-        name: "Город Топск",
-        text: "",
-        money: 100,
-    }
-}
-const server_market = {
-    goods:[]
-};
+
+const connections = [];
 
 io.on('connection', (socket)=>{
-    server_data.players[socket.id] = {
-        name:"Имя",
-        text : "игрок",
-        level : 0,
-        class : "Ремесленник",
-        money: 0,
-        inventory:{},
-        timers:{
-            earn:0
-        }
-    };
-    console.log("+ Пользователь", server_data.players.length, server_data.players);
+    connections.push(socket.id);
+    console.log("+ Пользователь", connections.length);
 
-    socket.on("get_data", (callback)=>{
-        console.log("get_data...");
-        callback({
-            data:server_data,
-            id:socket.id
-        })
-    })
-    // socket.on('change_data', (data) => {
-    //     server_data = update_server_data(data)
-    //     console.log("change_data...");
-    //     io.emit('data', server_data);
-    // });
     socket.on('earn_wood', (id) => {
         if (server_data.players[id].timers.earn<Date.now())
         Promise.resolve().then(()=>{
@@ -72,9 +38,13 @@ io.on('connection', (socket)=>{
         };
         //Проводим валидацию
         $player = server_data.players[data.player_id];
-        if ($player) { //Если есть игрок
-            $player.inventory
+        if (!$player) { //Если есть игрок
+            return;
         }
+        if (!$player.inventory[data.product]) { //если есть товар
+            return;
+        }
+         
         //Отправляем товар на рынок
         server_market.goods.push(data);
     });
