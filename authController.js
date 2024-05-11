@@ -57,18 +57,18 @@ class authController{
                             console.log("Удачная авторизация");
                             const token = jwt.sign({ username },  
                             process.env.JWT_SECRET_KEY, { 
-                                expiresIn: 86400 
+                                expiresIn: "23h" 
                             }); 
                             req.body.token = token;
                             return res.json({ username, token, msg: "Login Success" });
                         }else{
                             console.log("Неудачная попытка авторизоваться");
-                            return res.res.json({msg:"Пароли не совпадают"});
+                            return res.json({msg:"Пароли не совпадают", code:401});
                         }
                     }
                 }
                 console.log("Пользователь не найден");
-                return res.json({msg: "Пользователь не найден"});
+                return res.json({msg: "Пользователь не найден", code:401});
             } catch (error) {
                 console.log(error);
             }

@@ -36,7 +36,7 @@ app.get('/login',(req,res)=>{
 })
 app.post('/registration',urlencodedParser,authController.registration)
 app.get('/registration',(req,res)=>{
-    res.sendFile(path.join(__dirname,"public" ,"register.html"));
+    res.sendFile(path.join(__dirname,"public" ,"registration.html"));
 })
 app.post('/users',authController.getUsers)
 

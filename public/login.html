@@ -35,11 +35,15 @@
         })
         .then(response => response.json())
         .then(data => {
+            if (data.code == 401){
+                alert("Неверные логин или пароль");
+                return;
+            }
             document.cookie = "token="+data.token;
             localStorage.setItem(
             "token",
             JSON.stringify(data.token));
-
+            alert("Удачная авторизация! Нажмите - вернуться")
             // window.location.href = '/';
         });
     }

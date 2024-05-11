@@ -49,6 +49,11 @@ html,body{
     bottom: auto;
     right: 1px;
 }
+.timer{
+    position: fixed;
+    margin: 2px;
+    width: 120px;
+}
 .market{
     display: none;
     background-color: #3339;
