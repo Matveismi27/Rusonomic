@@ -1,4 +1,4 @@
-function BuildTown(canvas){
+async function BuildTown(canvas, socket){
     const ctx = canvas.getContext("2d")
     //нарисуем сетку
     let width = canvas.width
@@ -42,16 +42,61 @@ function BuildTown(canvas){
     
     FirstDrawGrid()
     drawGridRect(1,1,5,5,1)
+    //Кнопки
+    let button_panel = {};
+    socket.emit("build_buttons",(response)=>{
+        console.log(response);
+        button_panel = response;
+        for (index in button_panel){
+            console.log(index);
+            drawGridRect(7,index,8,8,button_panel[index]["type"])
+            draw();
+            drawGrid();
+        }
+
+    })
     pole[1][1]=2
-    function click(x,y){// функция производит необходимые действие при клике(касанию)
+    $placing = false;
+    info = {};
+
+    async function click(x,y){// функция производит необходимые действие при клике(касанию)
+        draw();
+        drawGrid();
         if (y>grid_rows||x>grid_columns||pole[y][x]==0){
             return
         }
-        player=find(2)
-        pole[player.row][player.col]=1
-        pole[y][x]=2
-        draw()
-        drawGrid()
+        if (y>=7){
+            console.log("button:",);
+            info = button_panel[x];
+            llog(info["name"]+": "+info["cost"]+"₽")
+            $cost = info["cost"]+"₽";
+            socket.emit("get_info",localStorage.getItem('token'),(response)=>{
+                console.log(response);
+                balance = response.player.balance
+                if (info["cost"]<balance){
+                    ask("У вас хватает денег чтобы приобрести это здание, желаете это сделать?", 
+                    $cost,"Нет",
+                    ()=>{
+                        llog("Разместите строение");
+                        $placing = true;
+                    }, 
+                    ()=>{
+                        return;
+                    })
+                }
+                return;
+            })
+        }
+        if ($placing){
+            info.position = `(${x},${y})`;
+            socket.emit("place_building", info)
+            pole[y][x]=info["type"];
+            $placing = false;
+        }
+        // player=find(2)
+        // pole[player.row][player.col]=1
+        draw();
+        drawGrid();
     }
     canvas.onclick = function(e) { // обрабатываем клики мышью
         //Узнаем координаты
@@ -89,12 +134,18 @@ function BuildTown(canvas){
         while (j<grid_rows){
             while (i<grid_columns){
                 let img = new Image();
+                let cord_x = i*(width/grid_columns);
+                let cord_y = j*(height/grid_rows);
                 if (pole[j][i]==0){
-                    ctx.drawImage(treeImg,i*(width/grid_columns),j*(height/grid_rows))
+                    ctx.drawImage(treeImg,cord_x,cord_y)
                 }else if (pole[j][i]==1){
-                    ctx.drawImage(field1Img,i*(width/grid_columns),j*(height/grid_rows))
+                    ctx.drawImage(field1Img,cord_x,cord_y)
                 }else if (pole[j][i]==2){
-                    ctx.drawImage(house1Img,i*(width/grid_columns),j*(height/grid_rows))
+                    ctx.drawImage(house1Img,cord_x,cord_y)
+                }else{
+                    let new_img = new Image();
+                    new_img.src = 'files/images/'+pole[j][i]+'.png';
+                    ctx.drawImage(new_img,cord_x,cord_y)
                 }
                 i+=1
             }
