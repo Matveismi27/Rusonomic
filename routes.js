@@ -41,7 +41,7 @@ app.get('/registration',(req,res)=>{
 app.post('/users',authController.getUsers)
 
 const server = createServer(app);
-const port = 3000;
+const port = 80;
 server.listen(port, async () => {
     console.log(`server running at http://localhost:${port}`);
 });

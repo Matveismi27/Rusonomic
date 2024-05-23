@@ -222,15 +222,15 @@ io.on('connection', (socket)=>{
     socket.on('craft_statuet', async (callback) => {
         console.log(connections_names[socket.id], socket.id);
         user = connections_names[socket.id];
-        item_name = "статуетка";
-        // Крафт статуэтки
+        item_id = 1;
+        // Крафт фигурки
         query = `
         INSERT INTO public.good
         (id, author_id, item_id)
         VALUES(
         (select coalesce(max(id)+1,1) from good), 
         (select id from players where login = '${user}'), 
-        (select id from items where name = '${item_name}'));
+        ${item_id});
         INSERT INTO public.inventory
         (id, player_id, good_id, count)
         VALUES(

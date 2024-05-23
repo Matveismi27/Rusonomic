@@ -3,51 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>login</title>
+    <title>Login</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f5f5f5;
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 2em;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+        }
+        .container h2 {
+            margin-bottom: 1em;
+            font-size: 1.5em;
+            color: #333;
+        }
+        .container label {
+            display: block;
+            margin: 0.5em 0 0.2em;
+            font-size: 0.9em;
+            color: #555;
+        }
+        .container input {
+            width: 100%;
+            padding: 0.7em;
+            margin-bottom: 1em;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .container input[type="submit"] {
+            background-color: #6200ea;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .container input[type="submit"]:hover {
+            background-color: #3700b3;
+        }
+        .container a {
+            display: block;
+            text-align: center;
+            color: #6200ea;
+            text-decoration: none;
+            margin-top: 1em;
+            font-size: 0.9em;
+        }
+        .container a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-    <!-- <form method="post" id="myForm"> -->
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required><br><br>
+    <div class="container">
+        <h2>Авторизация</h2>
+        <label for="username">Имя пользователя:</label>
+        <input type="text" id="username" name="username" required>
         
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required><br><br>
+        <label for="password">Пароль:</label>
+        <input type="password" id="password" name="password" required>
         
         <input type="submit" onclick="submitForm()" value="Авторизоваться">
-        <a href="/registration">Загеристрироваться</a><br>
-        <a href="/">Вернуться</a><br>
-        <br>
+        <a href="/registration">Зарегистрироваться</a>
+        <a href="/" id="return-link">Вернуться</a>
         <a href="./localGames/games.html">Попробуйте также - локальные игры</a>
-    <!-- </form> -->
-    <div id="result"></div>
+    </div>
+    <script>
+        function submitForm() {
+            const data = {
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value
+            };
+            fetch('/login', {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code == 401) {
+                    alert("Неверные логин или пароль");
+                    return;
+                }
+                document.cookie = "token=" + data.token;
+                localStorage.setItem("token", JSON.stringify(data.token));
+                document.getElementById('return-link').click();
+            });
+        }
+    </script>
 </body>
-<script>
-    function submitForm() {
-        const data = {
-            username:document.getElementById('username').value,
-            password:document.getElementById('password').value
-        };
-        console.log(data);
-        fetch('/login', {
-            method: 'POST',
-            body: JSON.stringify(data),
-            headers: {
-                'Content-Type': 'application/json;charset=utf-8',
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.code == 401){
-                alert("Неверные логин или пароль");
-                return;
-            }
-            document.cookie = "token="+data.token;
-            localStorage.setItem(
-            "token",
-            JSON.stringify(data.token));
-            alert("Удачная авторизация! Нажмите - вернуться")
-            // window.location.href = '/';
-        });
-    }
-</script>
 </html>

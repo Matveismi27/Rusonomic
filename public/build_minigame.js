@@ -53,7 +53,6 @@ async function BuildTown(canvas, socket){
             draw();
             drawGrid();
         }
-
     })
     pole[1][1]=2
     $placing = false;

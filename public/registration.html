@@ -4,21 +4,83 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Зарегистрироваться</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f5f5f5;
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 2em;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+        }
+        .container h2 {
+            margin-bottom: 1em;
+            font-size: 1.5em;
+            color: #333;
+        }
+        .container label {
+            display: block;
+            margin: 0.5em 0 0.2em;
+            font-size: 0.9em;
+            color: #555;
+        }
+        .container input {
+            width: 100%;
+            padding: 0.7em;
+            margin-bottom: 1em;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .container input[type="submit"] {
+            background-color: #6200ea;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .container input[type="submit"]:hover {
+            background-color: #3700b3;
+        }
+        .container a {
+            display: block;
+            text-align: center;
+            color: #6200ea;
+            text-decoration: none;
+            margin-top: 1em;
+            font-size: 0.9em;
+        }
+        .container a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-    <form action="/registration" method="post">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required><br><br>
-        
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required><br><br>
-        
-        <label for="confirm_password">Confirm Password:</label>
-        <input type="password" id="confirm_password" name="confirm_password" required><br><br>
-        
-        <input type="submit" value="Зарегистрироваться">
+    <div class="container">
+        <h2>Регистрация</h2>
+        <form action="/registration" method="post">
+            <label for="username">Имя пользователя:</label>
+            <input type="text" id="username" name="username" required>
+            
+            <label for="password">Пароль:</label>
+            <input type="password" id="password" name="password" required>
+            
+            <label for="confirm_password">Подтвердите пароль:</label>
+            <input type="password" id="confirm_password" name="confirm_password" required>
+            
+            <input type="submit" value="Зарегистрироваться">
+        </form>
         <a href="/login">Авторизоваться</a>
-
-    </form>
+    </div>
 </body>
 </html>
