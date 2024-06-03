@@ -26,11 +26,11 @@ io.on('connection', (socket)=>{
         }
         let earn_time = user_timers[username]["earn"];
         if (!earn_time || earn_time<Date.now()){
-            user_timers[username]["earn"] = Date.now()+30*1000;
-            console.log("new_timer");
+            user_timers[username]["earn"] = Date.now()+1*1000;
+            console.log("new_earn_timer");
         }
         else{
-            console.log("skip");
+            console.log("skip_earn_timer");
             return;
         }
 
@@ -237,6 +237,7 @@ io.on('connection', (socket)=>{
         }
     }
     socket.on('get_info', async (token, callback)=>{
+        console.log("tick", Date.now());
         const data = await get_info(token)
         callback(data)
     })
@@ -260,9 +261,16 @@ io.on('connection', (socket)=>{
         query = `
         UPDATE public.buildings
         SET "date"=CURRENT_TIMESTAMP,
-            "author_id"=(select id from players where login = '${user}'),
-            "position"=${socket.position}
-        WHERE id=${info.id};`
+        "author_id"=(select id from players where login = '${user}'),
+        "position"='${info.position}'
+        WHERE id=${info.id};
+        UPDATE public.players 
+        SET balance = balance-(select cost from public.buildings where id = ${info.id})
+        WHERE login='${user}';`;
+        console.log(query);
+        build = await pool.query(query);
+        console.log(build);
+        return build;
     })
     socket.on('craft_statuet', async (callback) => {
         console.log(connections_names[socket.id], socket.id);

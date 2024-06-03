@@ -43,23 +43,16 @@ async function BuildTown(canvas, socket){
     FirstDrawGrid()
     drawGridRect(1,1,5,5,1)
     let button_panel = {};
-    function buildbuttons(){
-        //Кнопки
-        socket.emit("build_buttons",(response)=>{
-            button_panel = response;
-            for (index in button_panel){
-                drawGridRect(7,index,8,8,button_panel[index]["type"])
-                draw();
-                drawGrid();
-            }
-        })
-        
-    }
     function getInfo(is_buy) {
         socket.emit("get_info",localStorage.getItem('token'),(response)=>{
             //актуализируем поле
             pole = response.pole;
-            buildbuttons();
+            socket.emit("build_buttons",(response)=>{
+                button_panel = response;
+                for (index in button_panel){
+                    drawGridRect(7,index,8,8,button_panel[index]["type"])
+                }
+            })
             if (is_buy){
                 balance = response.player.balance
                 if (info["cost"]<balance){
@@ -80,11 +73,8 @@ async function BuildTown(canvas, socket){
     }
     $placing = false;
     info = {};
-    buildbuttons()
 
     async function click(x,y){// функция производит необходимые действие при клике(касанию)
-        draw();
-        drawGrid();
         if (y>grid_rows||x>grid_columns||pole[y][x]==0){
             return
         }
@@ -106,6 +96,7 @@ async function BuildTown(canvas, socket){
         draw();
         drawGrid();
     }
+    
     canvas.onclick = function(e) { // обрабатываем клики мышью
         //Узнаем координаты
         var x = (e.pageX - canvas.offsetLeft) / (canvas.offsetWidth/grid_columns) | 0;//находит КЛЕТКУ!
