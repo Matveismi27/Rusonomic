@@ -37,7 +37,7 @@ io.on('connection', (socket)=>{
 
         let query = `
         UPDATE public.players
-        SET balance = balance+1
+        SET balance = balance+1, exp = exp+1
         WHERE login='${username}';
         SELECT balance FROM public.players WHERE login='${username}';
         `
@@ -218,6 +218,7 @@ io.on('connection', (socket)=>{
             SET balance = balance-LEAST(balance, ${tribute_cost})
             WHERE login='${username}';
             `
+            
             result = await pool.query(query);
             timers.tribute_timer = Date.now() +5*60*1000
             result = await pool.query(query);
@@ -225,6 +226,12 @@ io.on('connection', (socket)=>{
         inventory = await get_inventory(username);
         market = await get_market(username);
         // console.log(inventory);
+        query = `
+        UPDATE public.players
+        SET level = level+1, exp = 0
+        WHERE exp>(level*10+5);
+        `
+        result = await pool.query(query);
         return {
             inventory: inventory.rows,
             market: market.rows,
@@ -272,6 +279,9 @@ io.on('connection', (socket)=>{
         console.log(build);
         return build;
     })
+    socket.on("tap_building", async (building_name)=>{
+
+    })
     socket.on('craft_statuet', async (callback) => {
         console.log(connections_names[socket.id], socket.id);
         user = connections_names[socket.id];
@@ -292,7 +302,7 @@ io.on('connection', (socket)=>{
         (select max(id) from good),
         1);
         UPDATE public.players
-        SET balance=balance-5, level = level+1
+        SET balance=balance-5, exp=exp+3
         WHERE login='${user}';
         `;
         craft = await pool.query(query);
@@ -302,7 +312,7 @@ io.on('connection', (socket)=>{
     });
     async function get_inventory(user){
         // Получение инвентаря
-        get_inventory_query = /*sql*/`
+        get_inventory_query = /**sql*/`
         SELECT inventory.id as inventory_id, player.name  as current_player, goods.author_id as author, items.*, inventory.count 
         FROM public.players as player
         left join public.inventory as inventory on inventory.player_id = player.id
@@ -315,7 +325,7 @@ io.on('connection', (socket)=>{
     }
     async function get_market(user){
         // Получение инвентаря
-        get_market_query = /*sql*/`
+        get_market_query = /**sql*/`
         SELECT market.id as market_id, vendor_id, items.name, items.level, market.cost, players.name as vendor
         FROM public.market as market
         left join public.good as goods on good_id = goods.id

@@ -77,7 +77,8 @@ async function BuildTown(canvas, socket){
     info = {};
 
     async function click(x,y){// функция производит необходимые действие при клике(касанию)
-        if (y>grid_rows||x>grid_columns||pole[y][x]==0){
+        let name = pole[y][x];
+        if (y>grid_rows||x>grid_columns||name==0){
             return
         }
         if (y>=7){
@@ -86,8 +87,9 @@ async function BuildTown(canvas, socket){
             llog(info["name"]+": "+info["cost"]+"₽")
             $cost = info["cost"]+"₽";
             getInfo(true);
-        }
-        if ($placing){
+        }else if (name != 0 && name != 1){
+            socket.emit("tap_building", name)
+        }else if ($placing && name==1){
             info.position = `(${y},${x})`;
             socket.emit("place_building", info)
             pole[y][x]=info["type"];

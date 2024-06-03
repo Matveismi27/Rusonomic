@@ -114,13 +114,12 @@
         <span>Население:</span> ${data.population}<br>
         `;
         let player_text = `
-        <span>id:</span> ${socket.id}<br>
         <span>Имя:</span> ${data.player.name}<br>
         <span>Капитал:</span> ${data.player.balance}₽<br>
         <span>уровень:</span> ${data.player.level}<br>
         <span>класс:</span> ${data.player.class}<br>
         `;
-        params = false;
+        params = true;
         if (params){
             player_text+=`
         <span>Сила:</span> ${data.player.strength}<br>
@@ -131,11 +130,11 @@
         shop_sell = document.querySelector(".sell_products");
         shop_sell.innerHTML = ""
         for (i in data.inventory){
-            if (!data.inventory[i].inventory_id) continue;
+            if (!data.inventory[i]) continue;
             shop_sell.innerHTML+=`
             <div class="product">
                 <div class="name">${data.inventory[i].name}</div>
-                <div class="cost">${data.market[i].cost} з.</div>
+                <div class="cost">${data.inventory[i].cost} з.</div>
                 <div onclick='sell_item(${data.inventory[i].inventory_id})' class="count">продать</div>
             </div>`
         }
@@ -153,8 +152,12 @@
             </div>
             `
         }
-        display_llog();
-        
+        messages_log = document.getElementById("messages");
+        messages_log.innerHTML = "";
+        for (item in messages){
+            text = messages[item];
+            messages_log.innerHTML+=`<div class="log" onclick="killMessage(${item})">${text}</div>`
+        }
         // sell_inventory = "";
         // for (element in player.inventory){
         //     object = player.inventory[element];
@@ -169,6 +172,38 @@
         document.querySelector(".player_info").innerHTML = player_text;
         document.querySelector(".timer").innerHTML = timer;
     }
+    setInterval(async ()=>{
+        await get_info()
+    },1*1000);
+    socket.on('data', (new_data) => {
+        data = new_data;
+    });
+    socket.on('tribute', (variant) => {
+        
+        if (variant == 0){
+            llog("С вас забрали деньги в качестве дани");
+            socket.emit("orda_lose");
+        }else if(variant == 1){
+            ask("Ордынец подошёл к вам в ожидании дани", "отдать дань", "сопротивляться",()=>{
+                llog("Вы отдали ему дань")
+                socket.emit("orda_lose");
+            },()=>{
+                llog("Вас избили и забрали деньги")
+                socket.emit("orda_lose");
+            });
+        }else if (variant == 2){
+            ask("Ордынец подошёл к вам в ожидании дани", "отдать дань", "сопротивляться",()=>{
+                llog("Вы отдали ему дань")
+                socket.emit("orda_lose");
+            },()=>{
+                llog("Вы успешно сопротивлялись и не отдали дань")
+                socket.emit("orda_win");
+            });
+        }else{
+            llog("Ничего не произошло")
+        }
+        
+    });
     function llog(text){
         messages.push(text);
         display_llog();
@@ -179,8 +214,8 @@
     }
 </script>
 <script>
-//todo МОДАЛЬНИК
-modal = document.querySelector(".modal");
+    //todo МОДАЛЬНИК
+    modal = document.querySelector(".modal");
     trigger = document.querySelector(".example");
     closeButton = document.querySelector(".close-button");
     yesButton = document.querySelector(".yes-button");
@@ -224,7 +259,6 @@ modal = document.querySelector(".modal");
     //todo МОДАЛЬНИК
 </script>
 <script src="build_minigame.js"></script>
-<script src="fight_minigame.js"></script>
 <script>
     
     
@@ -304,110 +338,7 @@ modal = document.querySelector(".modal");
         document.querySelector(".buy_products").style.display = "none";
         document.querySelector(".sell_products").style.display = "block";
     });
-    async function display(data){
-        let seс = data.tribute_timer/1000;
-        let minutes = Math.floor(seс/60);
-        let seconds = Math.floor(seс%60);
-        function str_pad_left(string, pad, length) {
-            return (new Array(length + 1).join(pad) + string).slice(-length);
-        }
-        const finalTime = str_pad_left(minutes, '0', 2) + ':' + str_pad_left(seconds, '0', 2);
-        let timer = `${finalTime} - сбор дани Орде`;           
-        let town_text = `
-        <span>Казна города:</span> ${data.treasury}₽<br>
-        <span>Население:</span> ${data.population}<br>
-        `;
-        let player_text = `
-        <span>Имя:</span> ${data.player.name}<br>
-        <span>Капитал:</span> ${data.player.balance}₽<br>
-        <span>уровень:</span> ${data.player.level}<br>
-        <span>класс:</span> ${data.player.class}<br>
-        `;
-        params = false;
-        if (params){
-            player_text+=`
-        <span>Сила:</span> ${data.player.strength}<br>
-        <span>Ловкость:</span> ${data.player.agility}<br>
-        <span>Интеллект:</span> ${data.player.intelligence}<br>
-        `
-        }
-        shop_sell = document.querySelector(".sell_products");
-        shop_sell.innerHTML = ""
-        for (i in data.inventory){
-            if (!data.inventory[i].inventory_id) continue;
-            shop_sell.innerHTML+=`
-            <div class="product">
-                <div class="name">${data.inventory[i].name}</div>
-                <div class="cost">${data.inventory[i].cost} з.</div>
-                <div onclick='sell_item(${data.inventory[i].inventory_id})' class="count">продать</div>
-            </div>`
-        }
-
-        shop_buy = document.querySelector(".buy_products");
-        shop_buy.innerHTML = ""
-        for (i in data.market){
-            if (!data.market[i].market_id) continue;
-            // console.log(i);
-            shop_buy.innerHTML+=`
-            <div class="product">
-                <div class="name">${data.market[i].name} - ${data.market[i].vendor}</div>
-                <div class="cost">${data.market[i].cost} з.</div>
-                <div onclick='buy_item(${data.market[i].market_id},${data.market[i].cost})' class="count">Купить</div>
-            </div>
-            `
-        }
-        messages_log = document.getElementById("messages");
-        messages_log.innerHTML = "";
-        for (item in messages){
-            text = messages[item];
-            messages_log.innerHTML+=`<div class="log" onclick="killMessage(${item})">${text}</div>`
-        }
-        // sell_inventory = "";
-        // for (element in player.inventory){
-        //     object = player.inventory[element];
-        //     player_text += `${object.name}:${object.count}<br>`;
-        //     sell_inventory += `
-        //     <div onclick="sell('${element}')" class="tosell product">
-        //         <div class="name">${object.name}</div>
-        //         <div class="count">${object.count} шт.</div>
-        //     </div>`;
-        // }
-        document.querySelector(".town_info").innerHTML = town_text;
-        document.querySelector(".player_info").innerHTML = player_text;
-        document.querySelector(".timer").innerHTML = timer;
-    }
-    setInterval(async ()=>{
-        await get_info()
-    },1*1000);
-    socket.on('data', (new_data) => {
-        data = new_data;
-    });
-    socket.on('tribute', (variant) => {
-        
-        if (variant == 0){
-            llog("С вас забрали деньги в качестве дани");
-            socket.emit("orda_lose");
-        }else if(variant == 1){
-            ask("Ордынец подошёл к вам в ожидании дани", "отдать дань", "сопротивляться",()=>{
-                llog("Вы отдали ему дань")
-                socket.emit("orda_lose");
-            },()=>{
-                llog("Вас избили и забрали деньги")
-                socket.emit("orda_lose");
-            });
-        }else if (variant == 2){
-            ask("Ордынец подошёл к вам в ожидании дани", "отдать дань", "сопротивляться",()=>{
-                llog("Вы отдали ему дань")
-                socket.emit("orda_lose");
-            },()=>{
-                llog("Вы успешно сопротивлялись и не отдали дань")
-                socket.emit("orda_win");
-            });
-        }else{
-            llog("Ничего не произошло")
-        }
-        
-    });
+    
     function sell_item(inventory_id){
         socket.emit("place_product",inventory_id);
     }
@@ -442,7 +373,7 @@ modal = document.querySelector(".modal");
         socket.emit('craft_statuet', async (response)=>{
             if (!response) return;
             data.inventory = await response;
-            llog("Ты получил статуэтку в инвентарь и теперь можешь её продать, также твой уровень повышен")
+            llog("Ты получил статуэтку в инвентарь и теперь можешь её продать")
             display(data);
         });
         disable("#craft_statuet");
