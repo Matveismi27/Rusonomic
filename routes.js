@@ -39,7 +39,9 @@ app.get('/registration',(req,res)=>{
     res.sendFile(path.join(__dirname,"public" ,"registration.html"));
 })
 app.post('/users',authController.getUsers)
-
+app.get('/favicon.ico',(req,res)=>{
+    res.sendFile(path.join(__dirname,"favicon.png"));
+})
 const server = createServer(app);
 const port = 80;
 server.listen(port, async () => {

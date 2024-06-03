@@ -50,8 +50,10 @@ async function BuildTown(canvas, socket){
             socket.emit("build_buttons",(response)=>{
                 button_panel = response;
                 for (index in button_panel){
-                    drawGridRect(7,index,8,8,button_panel[index]["type"])
+                    pole[7][index] = button_panel[index]["type"];
                 }
+                // drawGridRect(7,(lastIndex+1),8,8,0)
+                // if (lastIndex == 7) pole[8][8] = 1;
             })
             if (is_buy){
                 balance = response.player.balance
@@ -86,7 +88,7 @@ async function BuildTown(canvas, socket){
             getInfo(true);
         }
         if ($placing){
-            info.position = `(${x},${y})`;
+            info.position = `(${y},${x})`;
             socket.emit("place_building", info)
             pole[y][x]=info["type"];
             $placing = false;
@@ -122,10 +124,6 @@ async function BuildTown(canvas, socket){
     field1Img.src = 'files/images/empty.png';
     ctx.drawImage(field1Img,height-5,width-2)
     house1Img.src = 'files/images/house.png';
-    house1Img.onload =()=>{
-        draw();
-        drawGrid();
-    }
     ctx.drawImage(house1Img,height-5,width-1)
     function draw(){
         getInfo(false);
@@ -136,15 +134,16 @@ async function BuildTown(canvas, socket){
                 let img = new Image();
                 let cord_x = i*(width/grid_columns);
                 let cord_y = j*(height/grid_rows);
-                if (pole[j][i]==0){
+                let name = pole[j][i]
+                if (name==0){
                     ctx.drawImage(treeImg,cord_x,cord_y)
-                }else if (pole[j][i]==1){
+                }else if (name==1){
                     ctx.drawImage(field1Img,cord_x,cord_y)
-                }else if (pole[j][i]==2){
+                }else if (name==2){
                     ctx.drawImage(house1Img,cord_x,cord_y)
                 }else{
                     let new_img = new Image();
-                    new_img.src = 'files/images/'+pole[j][i]+'.png';
+                    new_img.src = 'files/images/'+name+'.png';
                     ctx.drawImage(new_img,cord_x,cord_y)
                 }
                 i+=1
@@ -153,4 +152,8 @@ async function BuildTown(canvas, socket){
             j+=1
         }
     }
+    setInterval (()=>{
+        draw();
+        drawGrid();
+    },1000)
 }
