@@ -2,10 +2,32 @@ const pool = require("./db");
 const crypto = require('node:crypto');
 require("dotenv").config(); 
 const jwt = require("jsonwebtoken"); 
+var emailRegex = /^[-!#$%&'*+\/0-9=?A-Z^_a-z{|}~](\.?[-!#$%&'*+\/0-9=?A-Z^_a-z`{|}~])*@[a-zA-Z0-9](-*\.?[a-zA-Z0-9])*\.[a-zA-Z](-?[a-zA-Z0-9])+$/;
+function isEmailValid(email) {
+    if (!email)
+        return false;
+    if(email.length>254)
+        return false;
+    var valid = emailRegex.test(email);
+    if(!valid)
+        return false;
+    // Further checking of some things regex can't handle
+    var parts = email.split("@");
+    if(parts[0].length>64)
+        return false;
+    var domainParts = parts[1].split(".");
+    if(domainParts.some(function(part) { return part.length>63; }))
+        return false;
+    return true;
+}
 class authController{
     async registration(req, res){
         console.log("registration");
         try {
+            if (!isEmailValid(req.body.email)){
+                res.send("Некорректный email");
+                return;
+            }
             console.log(req.body);
             console.log(req.body.password);
             if (req.body.password == req.body.confirm_password && req.body.username && req.body.password){

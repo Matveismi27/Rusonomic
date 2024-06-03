@@ -53,7 +53,7 @@
     <div class="bottom_panel" id="earn_panel">
         <div class="button back" onclick="back()">меню</div>
         <div class="button" id="earn_money">добыть дерево (+1₽)</div>
-        <div class="button" id="craft_statuet">создать статуэтку (-2₽)</div>
+        <div class="button" id="craft_statuet">создать статуэтку (-5₽)</div>
     </div>
     <div class="bottom_panel" id="upgrade_panel">
         <div class="button back" onclick="back()">назад</div>
@@ -338,7 +338,7 @@ modal = document.querySelector(".modal");
             shop_sell.innerHTML+=`
             <div class="product">
                 <div class="name">${data.inventory[i].name}</div>
-                <div class="cost">${data.market[i].cost} з.</div>
+                <div class="cost">${data.inventory[i].cost} з.</div>
                 <div onclick='sell_item(${data.inventory[i].inventory_id})' class="count">продать</div>
             </div>`
         }
@@ -420,11 +420,15 @@ modal = document.querySelector(".modal");
     }
     document.querySelector("#earn_money").addEventListener('click', async (e) => {
         if (document.querySelector("#earn_money").style.backgroundColor){
+            llog("Ты устал, попробуй чуть позже")
             return;
         }
         e.preventDefault();
         socket.emit('earn_money', async (response)=>{
-            if (!response) return;
+            if (!response) {
+                llog("Ты устал, попробуй чуть позже")
+                return;
+            }
             data.player.balance=response;
             display(data);
         });
@@ -433,11 +437,12 @@ modal = document.querySelector(".modal");
     document.querySelector("#craft_statuet").addEventListener('click', (e) => {
         e.preventDefault();
         //Базовая проверка на наличие ресурсов
-        if (data.player.balance<2)return;
+        if (data.player.balance<5)return;
         // работа сервера
         socket.emit('craft_statuet', async (response)=>{
             if (!response) return;
             data.inventory = await response;
+            llog("Ты получил статуэтку в инвентарь и теперь можешь её продать, также твой уровень повышен")
             display(data);
         });
         disable("#craft_statuet");

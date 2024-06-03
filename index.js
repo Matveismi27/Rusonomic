@@ -11,14 +11,30 @@ const io = new Server(server);
 let connections = [];
 let connections_names = {};
 let timers = {
-    tribute_timer: Date.now()+3*60*1000
+    tribute_timer: Date.now()+5*60*1000
 }
+let user_timers = {};
 io.on('connection', (socket)=>{
     connections.push(socket.id);
     console.log("+ Пользователь", connections.length);
 
     socket.on('earn_money', async (callback) => {
         username = connections_names[socket.id];
+        if (!user_timers[username]) {
+            user_timers[username] = {}
+            console.log("noname");
+        }
+        let earn_time = user_timers[username]["earn"];
+        if (!earn_time || earn_time<Date.now()){
+            user_timers[username]["earn"] = Date.now()+30*1000;
+            console.log("new_timer");
+        }
+        else{
+            console.log("skip");
+            return;
+        }
+
+
         let query = `
         UPDATE public.players
         SET balance = balance+1
@@ -55,7 +71,8 @@ io.on('connection', (socket)=>{
     socket.on('build_buttons', async (callback)=>{
         let query = `
         SELECT * FROM buildings
-        WHERE author_id IS NULL;
+        WHERE position IS NULL
+        ORDER BY cost
         `;
         try{
             const data = await pool.query(query);
@@ -108,9 +125,36 @@ io.on('connection', (socket)=>{
     //Получение всей информации доступной игроку
     
     async function get_info(token){
-        let population, treasury, result;
+        let population, treasury, result, pole, query;
+        // * POLE
+        /**
+         * Берём построеные здания
+         * и выставляем их на поле
+         */
+        query = `
+        SELECT *
+        FROM public.buildings
+        WHERE position IS NOT NULL
+        `
+        result = await pool.query(query);
+        pole = [];
+        for (cordX in [1,2,3,4,5,6,7,8]){
+            pole[cordX] = [];
+            for (cordY in [1,2,3,4,5,6,7,8]){
+                if (cordX>0 && cordX<5 && cordY>0 && cordY<5){
+                    pole[cordX][cordY] = 1;
+                }else{
+                    pole[cordX][cordY] = 0;
+                }
+            }
+        }
+        let pos = [0,0];
+        for (building of result.rows){
+            pos = building.position;
+            pole[pos.x][pos.y] = building.type;
+        }
         // * POPULATION
-        let query = `
+        query = `
         SELECT count(login)
         FROM public.players;
         `
@@ -175,7 +219,7 @@ io.on('connection', (socket)=>{
             WHERE login='${username}';
             `
             result = await pool.query(query);
-            timers.tribute_timer = Date.now() +4*60*1000
+            timers.tribute_timer = Date.now() +5*60*1000
             result = await pool.query(query);
         }
         inventory = await get_inventory(username);
@@ -189,6 +233,7 @@ io.on('connection', (socket)=>{
             treasury:treasury,
             id:socket.id,
             tribute_timer:timers.tribute_timer-Date.now(),
+            pole:pole,
         }
     }
     socket.on('get_info', async (token, callback)=>{
@@ -239,7 +284,7 @@ io.on('connection', (socket)=>{
         (select max(id) from good),
         1);
         UPDATE public.players
-        SET balance=balance-2
+        SET balance=balance-5, level = level+1
         WHERE login='${user}';
         `;
         craft = await pool.query(query);
