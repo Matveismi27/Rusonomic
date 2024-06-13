@@ -122,15 +122,29 @@
         params = true;
         if (params){
             player_text+=`
-        <span>Сила:</span> ${data.player.strength}<br>
-        <span>Ловкость:</span> ${data.player.agility}<br>
-        <span>Интеллект:</span> ${data.player.intelligence}<br>
-        `
+        <div class = "attributes">
+            <span onclick="upstat('strength')">сил. ${data.player.strength}</span>
+            <span onclick="upstat('agility')">лвк. ${data.player.agility}</span>
+            <span onclick="upstat('intelligence')">инт. ${data.player.intelligence}</span>
+        </div>`
         }
+        // spans = document.querySelectorAll(".attributes span")
+        // console.log(spans);
+        // if (spans)
+        // if ((data.player.strength + data.player.agility + data.player.intelligence)<data.player.level){
+        //     for (let i in spans) {
+        //         spans[i].style.backgroundColor = "black";
+        //     }
+        // }else{
+        //     for (let i in spans) {
+        //         spans[i].style.backgroundColor = "black";
+        //     }
+        // }
         shop_sell = document.querySelector(".sell_products");
         shop_sell.innerHTML = ""
         for (i in data.inventory){
             if (!data.inventory[i]) continue;
+            if (!data.inventory[i].cost) continue;
             shop_sell.innerHTML+=`
             <div class="product">
                 <div class="name">${data.inventory[i].name}</div>
@@ -141,8 +155,10 @@
 
         shop_buy = document.querySelector(".buy_products");
         shop_buy.innerHTML = ""
+        console.log(data.inventory);
         for (i in data.market){
-            if (!data.market[i].market_id) continue;
+            if (!data.market[i]) continue;
+            if (!data.market[i].cost) continue;
             // console.log(i);
             shop_buy.innerHTML+=`
             <div class="product">
@@ -178,8 +194,8 @@
     socket.on('data', (new_data) => {
         data = new_data;
     });
+
     socket.on('tribute', (variant) => {
-        
         if (variant == 0){
             llog("С вас забрали деньги в качестве дани");
             socket.emit("orda_lose");
@@ -200,10 +216,10 @@
                 socket.emit("orda_win");
             });
         }else{
-            llog("Ничего не произошло")
+            llog("Ничего не произошло");
         }
-        
     });
+
     function llog(text){
         messages.push(text);
         display_llog();
@@ -214,6 +230,10 @@
     }
 </script>
 <script>
+    //todo Upstat
+    function upstat(param){
+        socket.emit("upstat",param);
+    }
     //todo МОДАЛЬНИК
     modal = document.querySelector(".modal");
     trigger = document.querySelector(".example");
@@ -348,6 +368,7 @@
         }else{
             llog("Не хватает денег");
         }
+        display();
     }
     document.querySelector("#earn_money").addEventListener('click', async (e) => {
         if (document.querySelector("#earn_money").style.backgroundColor){

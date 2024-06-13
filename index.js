@@ -19,33 +19,52 @@ io.on('connection', (socket)=>{
     console.log("+ Пользователь", connections.length);
 
     socket.on('earn_money', async (callback) => {
-        username = connections_names[socket.id];
-        if (!user_timers[username]) {
-            user_timers[username] = {}
-            console.log("noname");
-        }
-        let earn_time = user_timers[username]["earn"];
-        if (!earn_time || earn_time<Date.now()){
-            user_timers[username]["earn"] = Date.now()+1*1000;
-            console.log("new_earn_timer");
-        }
-        else{
-            console.log("skip_earn_timer");
-            return;
-        }
+        try 
+        {
+            
+            let username = connections_names[socket.id];
+            let query = `
+            select * from public.players where login = '${username}';
+            `;
+            try{
+                result = await pool.query(query);
+                user = result.rows[0];
+            }catch(error){
+                console.log(error);
+            }
+            if (!user_timers[username]) {
+                user_timers[username] = {}
+                console.log("noname");
+            }
+            let earn_time = user_timers[username]["earn"];
+            if (!earn_time || earn_time<Date.now()){
+                user_timers[username]["earn"] = Date.now()+1*1000 - user.agility*6;
+                console.log("new_earn_timer");
+            }
+            else{
+                console.log("skip_earn_timer");
+                return;
+            }
 
 
-        let query = `
-        UPDATE public.players
-        SET balance = balance+1, exp = exp+1
-        WHERE login='${username}';
-        SELECT balance FROM public.players WHERE login='${username}';
-        `
-        
-        result = await pool.query(query);
+            query = `
+            UPDATE public.players
+            SET balance = balance+${parseInt(1+user.strength/3)}, exp = exp+${parseInt(1+user.intelligence/2)}
+            WHERE login='${username}';
+            SELECT balance FROM public.players WHERE login='${username}';
+            `
+            try{
+                result = await pool.query(query);
+            }catch(error){
+                console.log(error);
+            }
 
-        balance = result[1].rows[0].balance;
-        callback(balance);
+            balance = result[1].rows[0].balance;
+            callback(balance);
+        } catch (error) {
+            console.log(error);
+            callback(0);
+        }
     });
     //Разместить товар на рынке
     socket.on('place_product', async(inventory_id) => {
@@ -122,6 +141,25 @@ io.on('connection', (socket)=>{
     socket.on('orda_lose', async () => {
         console.log("Дань");
     });
+    //upstat
+    socket.on('upstat', async (param) => {
+        username = connections_names[socket.id];
+
+        let query = `
+        SELECT * FROM public.players WHERE login='${username}';
+        `
+        result = await pool.query(query);
+        current_user = result.rows[0];
+        if (current_user.level>
+        (current_user.strength+current_user.intelligence+current_user.agility)){
+            query = `
+            UPDATE public.players
+            SET ${param} = ${param}+1
+            WHERE login='${username}';`;
+            result = await pool.query(query);
+        }
+
+    });
     //Получение всей информации доступной игроку
     
     async function get_info(token){
@@ -180,27 +218,33 @@ io.on('connection', (socket)=>{
         connections_names[socket.id] = username;
         result = await pool.query(query);
         player = result.rows[0];
-        if (player.intelligence>(player.agility+player.strength)){
-            //интеллект
-            player.class = "Монах";
-        }else if(player.agility>(player.strength+player.intelligence)){
-            //ловкость
-            player.class = "Витязь";
-        }else if(player.strength>(player.agility+player.intelligence)){
-            //сила
-            player.class = "Богатырь";
-        }else if((player.strength+player.agility+player.intelligence)>=10){
-            // все и сразу
-            player.class = "Князь";
-        }else if((player.strength+player.agility+player.intelligence)>=4){
-            // средне
-            player.class = "Боярин";
-        }else{
-            // ничего
-            player.class = "Крестьянин";
+        try {
+                
+            if (player.intelligence>(player.agility+player.strength)){
+                //интеллект
+                player.class = "Монах";
+            }else if(player.agility>(player.strength+player.intelligence)){
+                //ловкость
+                player.class = "Витязь";
+            }else if(player.strength>(player.agility+player.intelligence)){
+                //сила
+                player.class = "Богатырь";
+            }else if((player.strength+player.agility+player.intelligence)>=10){
+                // все и сразу
+                player.class = "Князь";
+            }else if((player.strength+player.agility+player.intelligence)>=4){
+                // средне
+                player.class = "Боярин";
+            }else{
+                // ничего
+                player.class = "Крестьянин";
+            }
+        } 
+        catch (error) {
+            console.log(error);
         }
         if ((timers.tribute_timer-Date.now())<0){
-            tribute_cost = 5;
+            tribute_cost = 10;
             //Орда наступает!
             if(player.balance<=0){
                 socket.emit("tribute",-1);
